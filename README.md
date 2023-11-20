@@ -1,6 +1,9 @@
 # Jarkom-Modul-3-IT01-2023
 
 # Topologi
+![topo3](https://github.com/Koro129/Jarkom-Modul-3-IT01-2023/assets/102176304/6a5aab15-355e-49d2-969d-33fff0a39719)
+
+**Network Configuration :** 
 
 **Aura - (DHCP Relay)**
 ```
