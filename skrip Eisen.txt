@@ -1,0 +1,248 @@
+echo 'nameserver 192.168.122.1' > /etc/resolv.conf
+
+apt-get update
+apt-get install nginx -y
+apt install -y apache2-utils
+
+mkdir /etc/nginx/rahasisakita
+htpasswd -b -c /etc/nginx/rahasisakita/.htpasswd netics ajkit01
+
+echo 'upstream roundrobin {
+    server 10.64.3.1; #IP Lugner
+    server 10.64.3.2; #IP Linie
+    server 10.64.3.3; #IP Lawine
+}
+
+
+upstream roundrobin2 {
+    server 10.64.3.1; #IP Lugner
+    server 10.64.3.2; #IP Linie
+}
+
+upstream roundrobin1 {
+    server 10.64.3.1; #IP Lugner
+}
+
+
+upstream wroundrobin {
+    server 10.64.3.1 weight=1; #IP Lugner
+    server 10.64.3.2 weight=2; #IP Linie
+    server 10.64.3.3 weight=4; #IP Lawine
+}
+
+upstream leastconn {
+    least_conn;
+    server 10.64.3.1; #IP Lugner
+    server 10.64.3.2; #IP Linie
+    server 10.64.3.3; #IP Lawine
+}
+
+upstream ip_hash {
+    ip_hash;
+    server 10.64.3.1; #IP Lugner
+    server 10.64.3.2; #IP Linie
+    server 10.64.3.3; #IP Lawine
+}
+
+upstream generic_hash {
+    hash $request_uri consistent;
+    server 10.64.3.1; #IP Lugner
+    server 10.64.3.2; #IP Linie
+    server 10.64.3.3; #IP Lawine
+}
+
+server {
+    listen 81;
+    server_name _;
+
+    location / {
+        proxy_pass http://roundrobin;
+    }
+}
+
+server {
+    listen 82;
+    server_name _;
+
+    location / {
+        proxy_pass http://wroundrobin;
+    }
+
+    location ~ /\.ht {
+	deny all;
+    }
+}
+
+server {
+    listen 83;
+    server_name _;
+
+    location / {
+        proxy_pass http://leastconn;
+    }
+}
+
+server {
+    listen 84;
+    server_name _;
+
+    location / {
+        proxy_pass http://ip_hash;
+    }
+}
+
+server {
+    listen 85;
+    server_name _;
+
+    location / {
+        proxy_pass http://generic_hash;
+    }
+}
+
+server {
+    listen 892;
+    server_name _;
+
+    location / {
+        proxy_pass http://roundrobin2;
+    }
+}
+
+server {
+    listen 891;
+    server_name _;
+
+    location / {
+        proxy_pass http://roundrobin1;
+    }
+}
+
+server {
+    listen 810;
+    server_name _;
+
+    location / {
+        proxy_pass http://roundrobin;
+	auth_basic "Restricted Content";
+        auth_basic_user_file /etc/nginx/rahasisakita/.htpasswd;
+    }
+}
+
+server {
+    listen 812;
+    server_name _;
+
+    location / {
+        proxy_pass http://roundrobin;
+
+        allow 10.64.3.69;
+        allow 10.64.3.70;
+        allow 10.64.4.167;
+        allow 10.64.4.168;
+	allow 10.64.4.14;
+	deny all;
+
+    }
+}
+
+server {
+    listen 811;
+    server_name _;
+
+    location / {
+        proxy_pass http://roundrobin;
+    }
+
+    location ~ /its {
+        proxy_pass https://www.its.ac.id;
+        proxy_set_header Host www.its.ac.id;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+' > /etc/nginx/sites-available/granz.channel.it01
+
+echo 'upstream laravel {
+    server 10.64.4.1; #IP Frieren
+    server 10.64.4.2; #IP Flamme
+    server 10.64.4.3; #IP Fern
+}
+
+upstream laravelfpm1 {
+    server 10.64.4.1:81; #IP Frieren
+    server 10.64.4.2:81; #IP Flamme
+    server 10.64.4.3:81; #IP Fern
+}
+
+upstream laravelfpm2 {
+    server 10.64.4.1:82; #IP Frieren
+    server 10.64.4.2:82; #IP Flamme
+    server 10.64.4.3:82; #IP Fern
+}
+
+upstream laravelfpm3 {
+    server 10.64.4.1:83; #IP Frieren
+    server 10.64.4.2:83; #IP Flamme
+    server 10.64.4.3:83; #IP Fern
+}
+
+upstream laravel_leastconn{
+    least_conn;
+    server 10.64.4.1; #IP Frieren
+    server 10.64.4.2; #IP Flamme
+    server 10.64.4.3; #IP Fern
+}
+
+server {
+    listen 818;
+    server_name _;
+
+    location / {
+        proxy_pass http://laravel;
+    }
+}
+
+server {
+    listen 8191;
+    server_name _;
+
+    location / {
+        proxy_pass http://laravelfpm1;
+    }
+}
+
+server {
+    listen 8192;
+    server_name _;
+
+    location / {
+        proxy_pass http://laravelfpm2;
+    }
+}
+
+server {
+    listen 8193;
+    server_name _;
+
+    location / {
+        proxy_pass http://laravelfpm3;
+    }
+}
+
+server {
+    listen 820;
+    server_name _;
+
+    location / {
+        proxy_pass http://laravel_leastconn;
+    }
+}
+' > /etc/nginx/sites-available/riegel.canyon.it01
+
+ln -s /etc/nginx/sites-available/riegel.canyon.it01 /etc/nginx/sites-enabled
+ln -s /etc/nginx/sites-available/granz.channel.it01 /etc/nginx/sites-enabled
+rm -rf /etc/nginx/sites-enabled/default
+service nginx restart

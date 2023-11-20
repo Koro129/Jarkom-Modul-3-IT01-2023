@@ -1,0 +1,49 @@
+echo 'nameserver 192.168.122.1' > /etc/resolv.conf
+
+apt-get update && apt install nginx php php-fpm -y
+apt-get install htop -y
+apt-get install unzip -y
+apt-get install libapache2-mod-php7.3 -y
+
+url="https://drive.google.com/uc?export=download&id=1ViSkRq7SmwZgdK64eRbr5Fm1EGCTPrU1"
+
+curl -kLo "granz.channel.it01.com.zip" "$url" && unzip -q "granz.channel.it01.com.zip" && rm "granz.channel.it01.com.zip"
+
+mv modul-3 granz.channel.it01.com
+
+rm -r /var/www/granz.channel.it01.com
+
+mv granz.channel.it01.com /var/www/
+
+echo '	 server {
+
+ 	listen 80;
+
+ 	root /var/www/granz.channel.it01.com;
+
+ 	index index.php index.html index.htm;
+ 	server_name _;
+
+ 	location / {
+ 			try_files $uri $uri/ /index.php?$query_string;
+ 	}
+
+ 	# pass PHP scripts to FastCGI server
+ 	location ~ \.php$ {
+ 	include snippets/fastcgi-php.conf;
+ 	fastcgi_pass unix:/var/run/php/php7.3-fpm.sock;
+ 	}
+
+ location ~ /\.ht {
+ 			deny all;
+ 	}
+
+ 	error_log /var/log/nginx/jarkom_error.log;
+ 	access_log /var/log/nginx/jarkom_access.log;
+ }' > /etc/nginx/sites-available/granz.channel.it01
+
+ ln -s /etc/nginx/sites-available/granz.channel.it01 /etc/nginx/sites-enabled
+
+ rm -rf /etc/nginx/sites-enabled/default 
+ service nginx restart
+ service php7.3-fpm start

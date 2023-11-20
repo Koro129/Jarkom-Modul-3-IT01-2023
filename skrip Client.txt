@@ -1,0 +1,39 @@
+echo 'nameserver 192.168.122.1' >> /etc/resolv.conf
+
+apt-get update && apt-get install apache2-utils -y
+apt-get install lynx -y
+
+//ab -n 1000 -c 100 http://10.64.2.2:82/ //No 7
+
+//ab -n 200 -c 10 http://10.64.2.2:81/ //No 8 RoundRobin
+//ab -n 200 -c 10 http://10.64.2.2:82/ //No 8 weight RoundRobin
+//ab -n 200 -c 10 http://10.64.2.2:83/ //No 8 leastconn
+//ab -n 200 -c 10 http://10.64.2.2:84/ //No 8 ip_hash
+//ab -n 200 -c 10 http://10.64.2.2:85/ //No 8 generic_hash
+
+//ab -n 100 -c 10 http://10.64.2.2:81/ //No 9 3 worker
+//ab -n 100 -c 10 http://10.64.2.2:892/ //No 9 2 worker
+//ab -n 100 -c 10 http://10.64.2.2:891/ //No 9 1 worker
+
+//15-17
+//curl -X POST -H "Content-Type: application/json" -d @register.json http://riegel.canyon.it01.com/api/auth/register
+//curl -X POST -H "Content-Type: application/json" -d @register.json http://10.64.2.2:818/api/auth/login | grep -o '"token": *"[^"]*"' | cut -d\" -f4 > token.txt
+//curl -H "Authorization: Bearer $(cat token.txt)" http://10.64.2.2:818/api/me
+
+//register ab -n 100 -c 10 -p register.json -T application/json http://riegel.canyon.it01.com/api/auth/register
+//login ab -n 100 -c 10 -p register.json -T application/json http://riegel.canyon.it01.com/api/auth/login
+//me ab -n 100 -c 10 -H "Authorization: Bearer $(cat token.txt)" http://riegel.canyon.it01.com/api/me
+
+//ab -n 100 -c 10 http://10.64.2.2:8191/ //No 19 fpm1
+//ab -n 100 -c 10 http://10.64.2.2:8192/ //No 19 fpm2
+//ab -n 100 -c 10 http://10.64.2.2:8193/ //No 19 fpm3
+
+//ab -n 100 -c 10 http://10.64.2.2:8191/ //No 20
+
+mariadb --host=10.64.2.1 --port=3306 --user=kelompokit01 --password
+
+echo '
+{
+  "username": "user",
+  "password": "pass"
+}' > register.json

@@ -1,0 +1,30 @@
+echo 'nameserver 192.168.122.1' > /etc/resolv.conf
+
+apt update && apt-get install mariadb-server -y
+
+service mysql start
+
+mysql -u root -p -e "CREATE USER 'kelompokit01'@'%' IDENTIFIED BY 'passwordit01';"
+mysql -u root -p -e "CREATE USER 'kelompokit01'@'localhost' IDENTIFIED BY 'passwordit01';"
+mysql -u root -p -e "CREATE DATABASE dbkelompokit01;"
+mysql -u root -p -e "GRANT ALL PRIVILEGES ON *.* TO 'kelompokit01'@'%';"
+mysql -u root -p -e "GRANT ALL PRIVILEGES ON *.* TO 'kelompokit01'@'localhost';"
+mysql -u root -p -e "FLUSH PRIVILEGES;"
+
+echo '
+[client-server] 
+
+!includedir /etc/mysql/conf.d/ 
+!includedir /etc/mysql/mariadb.conf.d/ 
+
+[mysqld]
+skip-networking=0
+skip-bind-address' > /etc/mysql/my.cnf
+
+# Cari baris yang berisi bind-address
+bind_address_line=$(grep -n "bind-address" /etc/mysql/mariadb.conf.d/50-server.cnf | cut -d: -f1)
+
+# Ganti nilai bind-address dengan 0.0.0.0
+sed -i "${bind_address_line}s/127.0.0.1/0.0.0.0/" /etc/mysql/mariadb.conf.d/50-server.cnf
+
+service mysql restart
