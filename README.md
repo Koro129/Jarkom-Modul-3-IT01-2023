@@ -1,4 +1,4 @@
-![image](https://github.com/Koro129/Jarkom-Modul-3-IT01-2023/assets/113784446/557689bb-c0a6-4dda-900b-0f215fdb3b6f)# Jarkom-Modul-3-IT01-2023
+# Jarkom-Modul-3-IT01-2023
 
 # Topologi
 ![topo3](https://github.com/Koro129/Jarkom-Modul-3-IT01-2023/assets/102176304/6a5aab15-355e-49d2-969d-33fff0a39719)
